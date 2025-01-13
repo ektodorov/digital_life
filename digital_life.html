@@ -1,0 +1,194 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Digital life</title>
+</head>
+
+<body>
+
+<button id="buttonstart" onclick="start()">Start</button>
+<!-- <button id="buttonmoveoneturn" onclick="moveOneTurn()">Move one turn</button> -->
+<button id="buttonstop" onclick="stop()">Stop</button>
+<br>
+
+<div id="world">
+</div>
+
+<script>
+	var worldYX = [];
+	var symbolWall = '*';
+	var symbolSpace = ' ';
+	var symbolCreature = 'o';
+	var isStopped = false;
+	var updateInterval = 400;
+
+	function start() {
+		isStopped = false;
+		worldYX = createWorld();
+		moveCreatures(worldYX);
+	}
+
+	function stop() {
+		isStopped = true;
+	}
+
+	function moveOneTurn() {
+		moveCreatures(worldYX);
+	}
+
+	function createWorld() {
+		var arrayWorld = [
+			"***************",
+			"*     *       *",
+			"*             *",
+			"*             *",
+			"*       o     *",
+			"*             *",
+			"*******       *",
+			"*     *       *",
+			"*     *   o   *",
+			"*             *",
+			"*             *",
+			"*             *",
+			"*             *",
+			"*            o*",
+			"***************"];
+		var arrayYX = [];
+		for(var x = 0; x < arrayWorld.length; x++) {
+			arrayYX[x] = [];
+		}
+
+		console.log("arrayWorld[0].length=", arrayWorld[0].length);
+		console.log("arrayYX.length=", arrayYX.length);
+		for(var i = 0; i < arrayWorld.length; i++) {
+			var currentItem = arrayWorld[i];
+			var count = currentItem.length;
+			for(var x = 0; x < count; x++) {
+				arrayYX[i][x] = currentItem[x];
+			}
+		}
+
+		printWorld(arrayYX);
+
+		return arrayYX;
+	}
+
+	function printWorld(arrayYX) {
+		var height = arrayYX.length;
+		var width = arrayYX[0].length;
+
+		var strWorld = "";
+		for(var y = 0; y < width; y++) {
+			var row = "";
+			for(var x = 0; x < height; x++) {
+				row = row + arrayYX[y][x];
+			}
+			strWorld = strWorld + row + "\n";
+			console.log(row);
+		}
+
+		var preWorld = document.createElement('pre');
+		var divWorld = document.getElementById('world');
+		preWorld.innerHTML = strWorld;
+		divWorld.innerHTML = "";
+		divWorld.appendChild(preWorld);
+	}
+
+	function moveCreatures(arrayYX) {
+		if(isStopped) {return;}
+
+		var arrayCreatureCoordinates = findCreatures(arrayYX);
+		var count = arrayCreatureCoordinates.length;
+		console.log("moveCreatures, count=", count);
+		for(var x = 0; x < count; x++) {
+ 			var creature = arrayCreatureCoordinates[x];
+			var arrayMoves = findMoves(arrayYX, creature);
+			var move = getMove(arrayMoves);
+			console.log("creature.x=", creature[0], ", creature.y=", creature[1]);
+			console.log("move.x=", move[0], ", move.y=", move[1]);
+			arrayYX[creature[1]][creature[0]] = symbolSpace;
+			arrayYX[move[1]][move[0]] = symbolCreature;
+			printWorld(arrayYX);
+		}
+		//setTimeout(move.bind(null, arrayYX), 2000);
+		setTimeout(function(){moveCreatures(arrayYX);}, updateInterval);
+	}
+
+	function findMoves(arrayYX, creatureCoordinates) {
+		var arrayMoves = [];
+		var width = arrayYX.length;
+		var height = arrayYX[0].length;
+		var creatureX = creatureCoordinates[0];
+		var creatureY = creatureCoordinates[1];
+
+		var symbol = arrayYX[creatureY][creatureX + 1];
+		if(symbol == symbolSpace) {
+			arrayMoves.push([creatureX + 1, creatureY]);
+		}
+
+		symbol = arrayYX[creatureY][creatureX - 1];
+		if(symbol == symbolSpace) {
+			arrayMoves.push([creatureX - 1, creatureY]);
+		}
+
+		symbol = arrayYX[creatureY + 1][creatureX];
+		if(symbol == symbolSpace) {
+			arrayMoves.push([creatureX, creatureY + 1]);
+		}
+
+		symbol = arrayYX[creatureY - 1][creatureX];
+		if(symbol == symbolSpace) {
+			arrayMoves.push([creatureX, creatureY - 1]);
+		}
+
+		symbol = arrayYX[creatureY + 1][creatureX + 1];
+		if(symbol == symbolSpace) {
+			arrayMoves.push([creatureX + 1, creatureY + 1]);
+		}
+
+		symbol = arrayYX[creatureY - 1][creatureX + 1];
+		if(symbol == symbolSpace) {
+			arrayMoves.push([creatureX + 1, creatureY - 1]);
+		}
+
+		symbol = arrayYX[creatureY + 1][creatureX - 1];
+		if(symbol == symbolSpace) {
+			arrayMoves.push([creatureX - 1, creatureY + 1]);
+		}
+
+		symbol = arrayYX[creatureY - 1][creatureX - 1];
+		if(symbol == symbolSpace) {
+			arrayMoves.push([creatureX - 1, creatureY - 1]);
+		}
+
+		console.log("findMoves, arrayMoves=", arrayMoves);
+		return arrayMoves;
+	}
+
+	function getMove(arrayMoves) {
+		var count = arrayMoves.length;
+		var idx = Math.floor(Math.random() * count);
+		console.log("getMove, idx=", idx);
+		move = arrayMoves[idx];
+		return move;
+	}
+
+	function findCreatures(arrayYX) {
+		var arrayCreatureCoordinates = [];
+		var width = arrayYX.length;
+		var height = arrayYX[0].length;
+		for(var x = 0; x < width; x++) {
+			for(var y = 0; y < height; y++) {
+				var symbol = arrayYX[y][x];
+				if(symbol == 'o') {
+					arrayCreatureCoordinates.push([x, y]);
+				}
+			}
+		}
+		return arrayCreatureCoordinates;
+	}
+</script>
+
+</body>
+
+</html>
